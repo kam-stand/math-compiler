@@ -4,6 +4,8 @@ A easy and interactive compiler that evaluates mathematical expressions from the
 
 ## Overview
 
-In this repository you will find the source code for `math-compiler` a powerful interpreter that evaluates all things math!
+The purpose of `math-compiler` is to provide and easy and interactive tool for evaluating simple or complex math problems.
 
-`math-compiler` is a single executable and is currently only supported on `linux`.
+Having the ability of your terminal, whether it be [bash]() or [zsh](), to evaluate complex problems allows for a more streamlined workflow and reduces dependecies on other application.
+
+`math-compiler` aims to be user-friendly and powerful support a number of useful task.
