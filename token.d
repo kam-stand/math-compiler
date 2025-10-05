@@ -22,11 +22,12 @@ struct Token
     TokenType type;
     size_t start;
     size_t end;
+    byte[] slice;
 }
 
 unittest
 {
-    Token t = Token(TokenType.Int, 1, 1);
+    Token t = Token(TokenType.Int, 1, 1, null);
     assert(t.type == TokenType.Int);
     assert(t.start == 1 && t.end == 1);
 }
