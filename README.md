@@ -6,6 +6,6 @@ A easy and interactive compiler that evaluates mathematical expressions from the
 
 The purpose of `math-compiler` is to provide and easy and interactive tool for evaluating simple or complex math problems.
 
-Having the ability of your terminal, whether it be [bash]() or [zsh](), to evaluate complex problems allows for a more streamlined workflow and reduces dependecies on other application.
+Having the ability of your terminal, whether it be [bash](https://www.gnu.org/software/bash/) or [zsh](https://ohmyz.sh/), to evaluate complex expression allows for a smoother workflow and reduces the need for external dependencies .
 
-`math-compiler` aims to be user-friendly and powerful support a number of useful task.
+`math-compiler` aims to be user-friendly and powerful supporting a number of useful tasks.
