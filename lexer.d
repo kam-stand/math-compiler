@@ -44,6 +44,11 @@ class Lexer
                 index++;
                 break;
 
+            case '^':
+                tokens ~= new Token(TokenType.Carrot, input[index .. index + 1]);
+                index++;
+                break;
+
             default:
                 if (isDigit(c))
                 {

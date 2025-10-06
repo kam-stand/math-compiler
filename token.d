@@ -12,7 +12,8 @@ enum TokenType
     Plus,
     Minus,
     Asterisk,
-    Slash
+    Slash,
+    Carrot
 }
 
 struct Token
