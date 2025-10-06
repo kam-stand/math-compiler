@@ -7,8 +7,6 @@ enum TokenType
 
     // Base types
     Int,
-    Double,
-    Float,
 
     // Operators
     Plus,
@@ -20,16 +18,13 @@ enum TokenType
 struct Token
 {
     TokenType type;
-    size_t start;
-    size_t end;
     byte[] slice;
 }
 
 unittest
 {
-    Token t = Token(TokenType.Int, 1, 1, null);
+    Token t = Token(TokenType.Int, null);
     assert(t.type == TokenType.Int);
-    assert(t.start == 1 && t.end == 1);
 }
 
 unittest
@@ -45,15 +40,15 @@ unittest
 
         if (isDigit(input[i]))
         {
-            tokens[index++] = Token(TokenType.Int, i, i, input[i .. i + 1]);
+            tokens[index++] = Token(TokenType.Int, input[i .. i + 1]);
         }
         else
         {
-            tokens[index++] = Token(TokenType.Plus, i, i, input[i .. i + 1]);
+            tokens[index++] = Token(TokenType.Plus, input[i .. i + 1]);
         }
 
     }
-    tokens[index] = Token(TokenType.Eof, i, i);
+    tokens[index] = Token(TokenType.Eof, null);
     assert(tokens[3].type == TokenType.Eof);
     assert(tokens[0].type == TokenType.Int);
 
@@ -72,15 +67,15 @@ unittest
 
         if (isDigit(input[i]))
         {
-            tokens[index++] = Token(TokenType.Int, i, i, input[i .. i + 1]);
+            tokens[index++] = Token(TokenType.Int, input[i .. i + 1]);
         }
         else
         {
-            tokens[index++] = Token(TokenType.Plus, i, i, input[i .. i + 1]);
+            tokens[index++] = Token(TokenType.Plus, input[i .. i + 1]);
         }
 
     }
-    tokens[index] = Token(TokenType.Eof, i, i);
+    tokens[index] = Token(TokenType.Eof, null);
     assert(tokens[0].slice == input[0 .. 1]);
     assert(tokens[2].slice == input[2 .. $]);
 
@@ -99,15 +94,15 @@ unittest
 
         if (isDigit(input[i]))
         {
-            tokens[index++] = Token(TokenType.Int, i, i, input[i .. i + 1]);
+            tokens[index++] = Token(TokenType.Int, input[i .. i + 1]);
         }
         else
         {
-            tokens[index++] = Token(TokenType.Plus, i, i, input[i .. i + 1]);
+            tokens[index++] = Token(TokenType.Plus, input[i .. i + 1]);
         }
 
     }
-    tokens[index] = Token(TokenType.Eof, i, i);
+    tokens[index] = Token(TokenType.Eof, null);
     assert(cast(string) tokens[0].slice == "3");
     assert(cast(string) tokens[1].slice != "-");
     assert(cast(string) tokens[2].slice == "4");
