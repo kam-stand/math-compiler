@@ -13,7 +13,10 @@ enum TokenType
     Minus,
     Asterisk,
     Slash,
-    Carrot
+    Carrot,
+    Less,
+    Greater
+
 }
 
 struct Token

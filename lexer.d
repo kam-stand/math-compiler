@@ -49,6 +49,16 @@ class Lexer
                 index++;
                 break;
 
+            case '<':
+                tokens ~= new Token(TokenType.Less, input[index .. index + 1]);
+                index++;
+                break;
+
+            case '>':
+                tokens ~= new Token(TokenType.Greater, input[index .. index + 1]);
+                index++;
+                break;
+
             default:
                 if (isDigit(c))
                 {
