@@ -58,6 +58,23 @@ class Lexer
                 tokens ~= new Token(TokenType.Greater, input[index .. index + 1]);
                 index++;
                 break;
+            case '(':
+                tokens ~= new Token(TokenType.LeftParen, input[index .. index + 1]);
+                index++;
+                break;
+            case ')':
+                tokens ~= new Token(TokenType.RightParen, input[index .. index + 1]);
+                index++;
+                break;
+            case '!':
+                tokens ~= new Token(TokenType.Bang, input[index .. index + 1]);
+                index++;
+                break;
+            case ' ':
+            case '\t':
+            case '\r':
+                index++;
+                break;
 
             default:
                 if (isDigit(c))
