@@ -7,8 +7,6 @@ enum TokenType
 
     // Base types
     Int,
-    Double,
-    Float,
 
     // Operators
     Plus,
