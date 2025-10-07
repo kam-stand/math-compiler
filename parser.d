@@ -6,6 +6,7 @@ import lexer;
 
 enum Precedence
 {
+    Lowest = 0,
     Comparison, // <  >
     Additive, // + -
     Multiplicative, // * /
@@ -100,7 +101,7 @@ class Parser
             return parseLiteral(tok);
 
         case TokenType.LeftParen:
-            auto expr = parse(0);
+            auto expr = parse(Precedence.Lowest);
             advance(); // consume ')'
             return expr;
 
@@ -124,6 +125,8 @@ class Parser
         case TokenType.Slash:
         case TokenType.Asterisk:
         case TokenType.Carrot:
+        case TokenType.Less:
+        case TokenType.Greater:
             return parseInfix(lhs, op);
         default:
             writeln("Unexpected token in led: ", op.type);
@@ -239,6 +242,20 @@ unittest
     // Its right-hand side should also be another '^' infix
     assert(expr.infix.rhs.type == ExpressionType.Infix);
     assert(expr.infix.rhs.infix.op.type == TokenType.Carrot);
+
+    writeln("Parsed successfully!");
+}
+
+unittest
+{
+    string line = "2>3";
+    byte[] input = cast(byte[]) line;
+    Lexer l = new Lexer(input);
+    Parser p = new Parser(l.tokens);
+    auto expr = p.parse(0);
+
+    displayParenRPN(expr);
+    writeln();
 
     writeln("Parsed successfully!");
 }
