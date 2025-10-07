@@ -74,27 +74,24 @@ class Parser
     {
         auto tok = peek();
         advance();
-        auto left = parseNud(tok);
+        auto lhs = parseNud(tok);
 
         while (notAtEnd())
         {
-            auto next = peek();
-            int prec = precedenceOf(next);
+            auto op = peek();
+            int prec = precedenceOf(op);
 
             // stop if next operator binds weaker or equal
-            if (next.type == TokenType.Eof || prec <= minPrecedence)
+            if (op.type == TokenType.Eof || prec <= minPrecedence)
                 break;
 
             advance();
-            left = parseLed(left, next);
+            lhs = parseLed(lhs, op);
         }
 
-        return left;
+        return lhs;
     }
 
-    // -------------------------------------------
-    // 🔹 parseNud: things that start expressions
-    // -------------------------------------------
     Expression* parseNud(Token* tok)
     {
         switch (tok.type)
@@ -116,15 +113,12 @@ class Parser
         }
     }
 
-    // -------------------------------------------
-    // 🔹 parseLed: handles infix and postfix ops
-    // -------------------------------------------
     Expression* parseLed(Expression* lhs, Token* op)
     {
         switch (op.type)
         {
         case TokenType.Bang: // postfix
-            return parsePostFix(lhs, op);
+            return parsePostfix(lhs, op);
         case TokenType.Plus:
         case TokenType.Minus:
         case TokenType.Slash:
@@ -137,9 +131,6 @@ class Parser
         }
     }
 
-    // -------------------------------------------
-    // Helpers (you could add pretty printers here)
-    // -------------------------------------------
     Expression* parseLiteral(Token* tok)
     {
         return makeLiteral(tok);
@@ -153,13 +144,17 @@ class Parser
 
     Expression* parseInfix(Expression* lhs, Token* op)
     {
-        auto rhs = parse(precedenceOf(op));
+        int precedence = precedenceOf(op);
+        if (op.type is TokenType.Carrot)
+            precedence -= 1;
+
+        auto rhs = parse(precedence);
         return makeInfix(lhs, op, rhs);
     }
 
-    Expression* parsePostFix(Expression* lhs, Token* op)
+    Expression* parsePostfix(Expression* lhs, Token* op)
     {
-        return makePostFix(op, lhs);
+        return makePostfix(op, lhs);
     }
 
 }
@@ -193,15 +188,12 @@ void displayParenRPN(Expression* ast)
     case ExpressionType.Postfix:
         write("(");
         displayParenRPN(ast.postfix.lhs);
-        write(" ", cast(string) ast.postfix.op.slice);
+        write("", cast(string) ast.postfix.op.slice);
         write(")");
         break;
     }
 }
 
-// -------------------------------------------
-// 🔹 Example usage / test
-// -------------------------------------------
 unittest
 {
     string line = "-12! + 3^2 * 6 / (4 + 4)";
@@ -226,5 +218,27 @@ unittest
     assert(expr.type is ExpressionType.Prefix);
     assert(expr.prefix.op.type is TokenType.Minus);
     assert(expr.prefix.rhs.type is ExpressionType.Postfix);
+    writeln("Parsed successfully!");
+}
+
+unittest
+{
+    string line = "2^2^3";
+    byte[] input = cast(byte[]) line;
+    Lexer l = new Lexer(input);
+    Parser p = new Parser(l.tokens);
+    auto expr = p.parse(0);
+
+    displayParenRPN(expr);
+    writeln();
+
+    // The root should be an infix '^'
+    assert(expr.type == ExpressionType.Infix);
+    assert(expr.infix.op.type == TokenType.Carrot);
+
+    // Its right-hand side should also be another '^' infix
+    assert(expr.infix.rhs.type == ExpressionType.Infix);
+    assert(expr.infix.rhs.infix.op.type == TokenType.Carrot);
+
     writeln("Parsed successfully!");
 }
