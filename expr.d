@@ -74,7 +74,7 @@ Expression* makeInfix(Expression* lhs, Token* op, Expression* rhs)
 
 }
 
-Expression* makePostFix(Token* op, Expression* lhs)
+Expression* makePostfix(Token* op, Expression* lhs)
 {
     auto postfix = new Postfix(lhs, op);
     auto expr = new Expression();
