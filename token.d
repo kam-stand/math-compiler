@@ -8,6 +8,9 @@ enum TokenType
     // Base types
     Int,
 
+    LeftParen,
+    RightParen,
+
     // Operators
     Plus,
     Minus,
@@ -15,7 +18,8 @@ enum TokenType
     Slash,
     Carrot,
     Less,
-    Greater
+    Greater,
+    Bang
 
 }
 
