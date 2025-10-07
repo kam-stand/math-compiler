@@ -200,3 +200,42 @@ unittest
     assert(t[1].type == TokenType.Illegal);
 
 }
+
+unittest
+{
+    byte[] input = ['1', '>', '=', '3'];
+
+    Lexer l = new Lexer(input);
+
+    auto t = l.tokens;
+    assert(t.length == 4);
+    assert(t[0].type == TokenType.Int);
+    assert(t[1].type == TokenType.GreaterEqual);
+
+}
+
+unittest
+{
+    byte[] input = ['1', '!', '=', '3'];
+
+    Lexer l = new Lexer(input);
+
+    auto t = l.tokens;
+    assert(t.length == 4);
+    assert(t[0].type == TokenType.Int);
+    assert(t[1].type == TokenType.BangEqual);
+
+}
+
+unittest
+{
+    byte[] input = ['1', '=', '=', '3'];
+
+    Lexer l = new Lexer(input);
+
+    auto t = l.tokens;
+    assert(t.length == 4);
+    assert(t[0].type == TokenType.Int);
+    assert(t[1].type == TokenType.EqualEqual);
+
+}
