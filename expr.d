@@ -6,6 +6,7 @@ enum ExpressionType
     Literal,
     Prefix,
     Infix,
+    Postfix
 }
 
 struct Literal
@@ -26,6 +27,12 @@ struct Infix
     Expression* rhs;
 }
 
+struct Postfix
+{
+    Expression* lhs;
+    Token* op;
+}
+
 struct Expression
 {
     ExpressionType type;
@@ -34,6 +41,7 @@ struct Expression
         Literal* lit;
         Prefix* prefix;
         Infix* infix;
+        Postfix* postfix;
     }
 }
 
@@ -62,6 +70,16 @@ Expression* makeInfix(Expression* lhs, Token* op, Expression* rhs)
     auto expr = new Expression();
     expr.type = ExpressionType.Infix;
     expr.infix = infix;
+    return expr;
+
+}
+
+Expression* makePostFix(Token* op, Expression* lhs)
+{
+    auto postfix = new Postfix(lhs, op);
+    auto expr = new Expression();
+    expr.type = ExpressionType.Postfix;
+    expr.postfix = postfix;
     return expr;
 
 }
