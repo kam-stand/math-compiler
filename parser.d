@@ -28,13 +28,19 @@ immutable Precedence[TokenType] precedences = [
 
 class Parser
 {
-    Token*[] tokens;
-    size_t pos = 0; // current position
 
+public:
+    Expression* ast;
     this(Token*[] tokens)
     {
         this.tokens = tokens;
+        this.ast = parse(Precedence.Lowest);
     }
+
+private:
+
+    Token*[] tokens; // tokens from lexer
+    size_t pos = 0; // current position
 
     Token* peek()
     {
