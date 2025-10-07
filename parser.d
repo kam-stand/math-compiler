@@ -209,8 +209,7 @@ unittest
     byte[] input = cast(byte[]) line;
     Lexer l = new Lexer(input);
     Parser p = new Parser(l.tokens);
-    auto expr = p.parse(0);
-    displayParenRPN(expr);
+    displayParenRPN(p.ast);
     writeln();
     writeln("Parsed successfully!");
 }
@@ -221,12 +220,11 @@ unittest
     byte[] input = cast(byte[]) line;
     Lexer l = new Lexer(input);
     Parser p = new Parser(l.tokens);
-    auto expr = p.parse(0);
-    displayParenRPN(expr);
+    displayParenRPN(p.ast);
     writeln();
-    assert(expr.type is ExpressionType.Prefix);
-    assert(expr.prefix.op.type is TokenType.Minus);
-    assert(expr.prefix.rhs.type is ExpressionType.Postfix);
+    assert(p.ast.type is ExpressionType.Prefix);
+    assert(p.ast.prefix.op.type is TokenType.Minus);
+    assert(p.ast.prefix.rhs.type is ExpressionType.Postfix);
     writeln("Parsed successfully!");
 }
 
@@ -236,18 +234,16 @@ unittest
     byte[] input = cast(byte[]) line;
     Lexer l = new Lexer(input);
     Parser p = new Parser(l.tokens);
-    auto expr = p.parse(0);
 
-    displayParenRPN(expr);
+    displayParenRPN(p.ast);
     writeln();
 
     // The root should be an infix '^'
-    assert(expr.type == ExpressionType.Infix);
-    assert(expr.infix.op.type == TokenType.Carrot);
-
+    assert(p.ast.type == ExpressionType.Infix);
+    assert(p.ast.infix.op.type == TokenType.Carrot);
     // Its right-hand side should also be another '^' infix
-    assert(expr.infix.rhs.type == ExpressionType.Infix);
-    assert(expr.infix.rhs.infix.op.type == TokenType.Carrot);
+    assert(p.ast.infix.rhs.type == ExpressionType.Infix);
+    assert(p.ast.infix.rhs.infix.op.type == TokenType.Carrot);
 
     writeln("Parsed successfully!");
 }
@@ -258,10 +254,7 @@ unittest
     byte[] input = cast(byte[]) line;
     Lexer l = new Lexer(input);
     Parser p = new Parser(l.tokens);
-    auto expr = p.parse(0);
-
-    displayParenRPN(expr);
+    displayParenRPN(p.ast);
     writeln();
-
     writeln("Parsed successfully!");
 }
