@@ -5,10 +5,8 @@ import std.stdio;
 
 class Lexer
 {
-
+public:
     Token*[] tokens;
-    byte[] input;
-    size_t index;
     this(byte[] input)
     {
         this.input = input;
@@ -16,6 +14,9 @@ class Lexer
         this.tokenize();
     }
 
+private:
+    byte[] input;
+    size_t index;
     void tokenize()
     {
         while (index < input.length)
