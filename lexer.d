@@ -17,64 +17,123 @@ public:
 private:
     byte[] input;
     size_t index;
+
+    void advance()
+    {
+        index++;
+    }
+
+    char peek()
+    {
+        return index < input.length ? cast(char) input[index] : '\0';
+    }
+
+    char peekNext()
+    {
+        return index + 1 < input.length ? cast(char) input[index + 1] : '\0';
+    }
+
     void tokenize()
     {
         while (index < input.length)
         {
-            auto c = input[index];
+            auto c = peek();
 
             switch (c)
             {
             case '+':
                 tokens ~= new Token(TokenType.Plus, input[index .. index + 1]);
-                index++;
+                advance();
                 break;
 
             case '-':
                 tokens ~= new Token(TokenType.Minus, input[index .. index + 1]);
-                index++;
+                advance();
                 break;
 
             case '*':
                 tokens ~= new Token(TokenType.Asterisk, input[index .. index + 1]);
-                index++;
+                advance();
                 break;
 
             case '/':
                 tokens ~= new Token(TokenType.Slash, input[index .. index + 1]);
-                index++;
+                advance();
                 break;
 
             case '^':
                 tokens ~= new Token(TokenType.Carrot, input[index .. index + 1]);
-                index++;
+                advance();
+                break;
+            case '=':
+                if (peekNext() == '=')
+                {
+                    tokens ~= new Token(TokenType.EqualEqual, input[index .. index + 2]);
+                    advance(); // consume '='
+                    advance(); // consume '='
+                }
+                else
+                {
+                    tokens ~= new Token(TokenType.Equal, input[index .. index + 1]);
+                    advance(); // consume '!'
+                }
                 break;
 
             case '<':
-                tokens ~= new Token(TokenType.Less, input[index .. index + 1]);
-                index++;
+                if (peekNext() == '=')
+                {
+                    tokens ~= new Token(TokenType.LessEqual, input[index .. index + 2]);
+                    advance(); // consume '<'
+                    advance(); // consume '='
+                }
+                else
+                {
+                    tokens ~= new Token(TokenType.Less, input[index .. index + 1]);
+                    advance(); // consume '<'
+                }
                 break;
 
             case '>':
-                tokens ~= new Token(TokenType.Greater, input[index .. index + 1]);
-                index++;
+                if (peekNext() == '=')
+                {
+                    tokens ~= new Token(TokenType.GreaterEqual, input[index .. index + 2]);
+                    advance(); // consume '>'
+                    advance(); // consume '='
+                }
+                else
+                {
+                    tokens ~= new Token(TokenType.Greater, input[index .. index + 1]);
+                    advance(); // consume '>'
+                }
                 break;
+
             case '(':
                 tokens ~= new Token(TokenType.LeftParen, input[index .. index + 1]);
-                index++;
+                advance();
                 break;
             case ')':
+
                 tokens ~= new Token(TokenType.RightParen, input[index .. index + 1]);
-                index++;
+                advance();
                 break;
+
             case '!':
-                tokens ~= new Token(TokenType.Bang, input[index .. index + 1]);
-                index++;
+                if (peekNext() == '=')
+                {
+                    tokens ~= new Token(TokenType.BangEqual, input[index .. index + 2]);
+                    advance(); // consume '!'
+                    advance(); // consume '='
+                }
+                else
+                {
+                    tokens ~= new Token(TokenType.Bang, input[index .. index + 1]);
+                    advance(); // consume '!'
+                }
                 break;
             case ' ':
             case '\t':
             case '\r':
-                index++;
+                advance();
                 break;
 
             default:
@@ -82,8 +141,8 @@ private:
                 {
                     size_t start = index;
 
-                    while (index < input.length && isDigit(input[index]))
-                        index++;
+                    while (index < input.length && isDigit(peek()))
+                        advance();
 
                     auto numText = input[start .. index];
                     tokens ~= new Token(TokenType.Int, numText);
@@ -91,7 +150,7 @@ private:
                 else
                 {
                     tokens ~= new Token(TokenType.Illegal, input[index .. index + 1]);
-                    index++;
+                    advance();
                 }
                 break;
             }
