@@ -30,9 +30,10 @@ int main(string[] args)
         byte[] input = cast(byte[]) line;
         Lexer l = new Lexer(input);
         Parser p = new Parser(l.tokens);
-        if (printAst)
-            displayParenRPN(p.stmts[0].expr.expr);
-        writeln();
+        // TODO: fix print to add stmts
+        // if (printAst)
+        //     displayParenRPN(p.stmts[0].expr.expr);
+        // writeln();
 
     }
 
