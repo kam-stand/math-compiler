@@ -56,6 +56,11 @@ private:
                 advance();
                 break;
 
+            case ';':
+                tokens ~= new Token(TokenType.Semicolon, input[index .. index + 1]);
+                advance();
+                break;
+
             case '/':
                 tokens ~= new Token(TokenType.Slash, input[index .. index + 1]);
                 advance();
@@ -388,4 +393,17 @@ unittest
     auto t = l.tokens;
     assert(t.length == 2);
     assert(t[0].type == TokenType.String);
+}
+
+unittest
+{
+    byte[] input = ['1', '2', ';'];
+
+    Lexer l = new Lexer(input);
+
+    auto t = l.tokens;
+    assert(t.length == 3);
+    assert(t[1].type == TokenType.Semicolon);
+    assert(cast(string) t[1].slice == ";");
+
 }

@@ -28,6 +28,10 @@ enum TokenType
     EqualEqual,
     LessEqual,
     GreaterEqual,
+
+    // Delimitters
+    Semicolon,
+
     // types
     Question,
     Identifier, // 'x'

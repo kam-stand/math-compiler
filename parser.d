@@ -112,7 +112,11 @@ private:
     {
         switch (tok.type)
         {
+            // literals
         case TokenType.Int:
+        case TokenType.Double:
+        case TokenType.Float:
+        case TokenType.String:
             return parseLiteral(tok);
 
         case TokenType.LeftParen:
