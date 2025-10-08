@@ -58,9 +58,9 @@ Statement* makeVarStmt(Token* ident, Expression* expr)
 
 Statement* makeExpressionStmt(Expression* expr)
 {
-    auto expr = new ExpressionStatement(expr);
+    auto exprStmt = new ExpressionStatement(expr);
     auto stmt = new Statement();
     stmt.type = StatementType.Expression;
-    stmt.expr = expr;
+    stmt.expr = exprStmt;
     return stmt;
 }
