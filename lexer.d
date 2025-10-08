@@ -56,6 +56,11 @@ private:
                 advance();
                 break;
 
+            case ';':
+                tokens ~= new Token(TokenType.Semicolon, input[index .. index + 1]);
+                advance();
+                break;
+
             case '/':
                 tokens ~= new Token(TokenType.Slash, input[index .. index + 1]);
                 advance();
@@ -135,6 +140,18 @@ private:
                     advance(); // consume '!'
                 }
                 break;
+            case '"':
+                size_t start = index;
+                advance(); // consude open "'"
+                while (index < input.length && peek() != '"')
+                {
+                    advance();
+                }
+
+                auto slice = input[start .. index + 1];
+                tokens ~= new Token(TokenType.String, slice);
+                advance(); // consume closing '"'
+                break;
             case ' ':
             case '\t':
             case '\r':
@@ -145,12 +162,58 @@ private:
                 if (isDigit(c))
                 {
                     size_t start = index;
+                    bool hasDecimal = false;
 
-                    while (index < input.length && isDigit(peek()))
-                        advance();
+                    while (index < input.length)
+                    {
+                        char next = peek();
+
+                        if (isDigit(next))
+                        {
+                            advance();
+                        }
+                        else if (next == '.' && !hasDecimal)
+                        {
+                            hasDecimal = true;
+                            advance();
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    // Check if next character (AFTER number) is 'F' or 'f'
+                    bool isFloat = false;
+                    if (index < input.length && (peek() == 'F' || peek() == 'f'))
+                    {
+                        isFloat = true;
+                        advance(); // consume the 'F'
+                    }
 
                     auto numText = input[start .. index];
-                    tokens ~= new Token(TokenType.Int, numText);
+
+                    if (isFloat)
+                        tokens ~= new Token(TokenType.Float, numText);
+                    else if (hasDecimal)
+                        tokens ~= new Token(TokenType.Double, numText);
+                    else
+                        tokens ~= new Token(TokenType.Int, numText);
+                }
+
+                else if (isAlpha(c))
+                {
+                    size_t start = index;
+                    while (index < input.length && isAlpha(peek()))
+                    {
+                        advance();
+                    }
+
+                    auto slice = input[start .. index];
+
+                    cast(string) slice in keyword ? (tokens ~= new Token(keyword[cast(string) slice], slice)) : (
+                        tokens ~= new Token(
+                            TokenType.Identifier, slice));
+
                 }
                 else
                 {
@@ -255,5 +318,92 @@ unittest
     assert(t.length == 5);
     assert(t[0].type == TokenType.Int);
     assert(t[3].type == TokenType.Question);
+
+}
+
+unittest
+{
+    byte[] input = ['v', 'a', 'r'];
+
+    Lexer l = new Lexer(input);
+
+    auto t = l.tokens;
+    assert(t.length == 2);
+    assert(t[0].type == TokenType.Var);
+
+}
+
+unittest
+{
+    byte[] input = ['v', 'a', 'r', ' ', 'x', '=', '1', '2'];
+
+    Lexer l = new Lexer(input);
+
+    auto t = l.tokens;
+    assert(t.length == 5);
+    assert(t[0].type == TokenType.Var);
+    assert(t[1].type == TokenType.Identifier);
+
+}
+
+unittest
+{
+    byte[] input = ['r', 'e', 't', 'u', 'r', 'n', ' ', '2', '3'];
+
+    Lexer l = new Lexer(input);
+
+    auto t = l.tokens;
+    assert(t.length == 3);
+    assert(t[0].type == TokenType.Return);
+    assert(t[1].type == TokenType.Int);
+
+}
+
+unittest
+{
+    byte[] input = ['1', '.', '2', '3'];
+
+    Lexer l = new Lexer(input);
+
+    auto t = l.tokens;
+    assert(t.length == 2);
+    assert(t[0].type == TokenType.Double);
+    assert(cast(string) t[0].slice == "1.23");
+
+}
+
+unittest
+{
+    byte[] input = ['1', '.', '2', '3', 'f'];
+
+    Lexer l = new Lexer(input);
+
+    auto t = l.tokens;
+    assert(t.length == 2);
+    assert(t[0].type == TokenType.Float);
+    assert(cast(string) t[0].slice == "1.23f");
+}
+
+unittest
+{
+    byte[] input = ['"', 'k', 'a', 'm', '"'];
+
+    Lexer l = new Lexer(input);
+
+    auto t = l.tokens;
+    assert(t.length == 2);
+    assert(t[0].type == TokenType.String);
+}
+
+unittest
+{
+    byte[] input = ['1', '2', ';'];
+
+    Lexer l = new Lexer(input);
+
+    auto t = l.tokens;
+    assert(t.length == 3);
+    assert(t[1].type == TokenType.Semicolon);
+    assert(cast(string) t[1].slice == ";");
 
 }

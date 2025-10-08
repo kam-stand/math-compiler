@@ -3,6 +3,7 @@ import token;
 import expr;
 import std.stdio;
 import lexer;
+import statement;
 
 enum Precedence
 {
@@ -40,10 +41,11 @@ class Parser
 
 public:
     Expression* ast;
+    Statement*[] stmts;
     this(Token*[] tokens)
     {
         this.tokens = tokens;
-        this.ast = parse(Precedence.Lowest);
+        this.stmts = this.parseProgram();
     }
 
 private:
@@ -83,6 +85,64 @@ private:
         return 0;
     }
 
+    Statement*[] parseProgram()
+    {
+        Statement*[] statements;
+        while (notAtEnd() && peek().type != TokenType.Eof)
+        {
+            statements ~= parseStatement();
+        }
+        return statements;
+    }
+
+    Statement* parseStatement()
+    {
+        switch (peek().type)
+        {
+        case TokenType.Var:
+            return parseVarStmt();
+        case TokenType.Return:
+            return parseReturnStmt();
+        default:
+            return parseExpressionStmt();
+        }
+    }
+
+    Statement* parseVarStmt()
+    {
+        advance(); // consume 'var'
+        auto ident = peek();
+        advance(); // consume identifier
+
+        // Expect '='
+        if (peek().type != TokenType.Equal)
+        {
+            writeln("Syntax Error: expected '=' after variable name");
+            return null;
+        }
+
+        advance(); // consume '='
+        auto expr = parse(Precedence.Lowest);
+
+        return makeVarStmt(ident, expr);
+    }
+
+    // TODO: CHECK for guards in null
+    Statement* parseReturnStmt()
+    {
+        advance(); // consume 'return'
+        auto expr = parse(Precedence.Lowest);
+        return makeReturnStmt(expr);
+    }
+
+    Statement* parseExpressionStmt()
+    {
+        auto expr = parse(Precedence.Lowest);
+        auto stmt = makeExpressionStmt(expr);
+        advance(); // move to next statement
+        return stmt;
+    }
+
     // -------------------------------------------
     // 🔹 Core parse loop (Pratt parser)
     // -------------------------------------------
@@ -104,7 +164,6 @@ private:
             advance();
             lhs = parseLed(lhs, op);
         }
-
         return lhs;
     }
 
@@ -112,7 +171,11 @@ private:
     {
         switch (tok.type)
         {
+            // literals
         case TokenType.Int:
+        case TokenType.Double:
+        case TokenType.Float:
+        case TokenType.String:
             return parseLiteral(tok);
 
         case TokenType.LeftParen:
@@ -222,7 +285,7 @@ unittest
     byte[] input = cast(byte[]) line;
     Lexer l = new Lexer(input);
     Parser p = new Parser(l.tokens);
-    displayParenRPN(p.ast);
+    displayParenRPN(p.stmts[0].expr.expr);
     writeln();
     writeln("Parsed successfully!");
 }
@@ -233,11 +296,11 @@ unittest
     byte[] input = cast(byte[]) line;
     Lexer l = new Lexer(input);
     Parser p = new Parser(l.tokens);
-    displayParenRPN(p.ast);
+    displayParenRPN((p.stmts[0].expr.expr));
     writeln();
-    assert(p.ast.type is ExpressionType.Prefix);
-    assert(p.ast.prefix.op.type is TokenType.Minus);
-    assert(p.ast.prefix.rhs.type is ExpressionType.Postfix);
+    assert(p.stmts[0].expr.expr.type is ExpressionType.Prefix);
+    assert(p.stmts[0].expr.expr.prefix.op.type is TokenType.Minus);
+    assert(p.stmts[0].expr.expr.prefix.rhs.type is ExpressionType.Postfix);
     writeln("Parsed successfully!");
 }
 
@@ -248,15 +311,13 @@ unittest
     Lexer l = new Lexer(input);
     Parser p = new Parser(l.tokens);
 
-    displayParenRPN(p.ast);
+    displayParenRPN((p.stmts[0].expr.expr));
     writeln();
 
-    // The root should be an infix '^'
-    assert(p.ast.type == ExpressionType.Infix);
-    assert(p.ast.infix.op.type == TokenType.Carrot);
-    // Its right-hand side should also be another '^' infix
-    assert(p.ast.infix.rhs.type == ExpressionType.Infix);
-    assert(p.ast.infix.rhs.infix.op.type == TokenType.Carrot);
+    assert(p.stmts[0].expr.expr.type == ExpressionType.Infix);
+    assert(p.stmts[0].expr.expr.infix.op.type == TokenType.Carrot);
+    assert(p.stmts[0].expr.expr.infix.rhs.type == ExpressionType.Infix);
+    assert(p.stmts[0].expr.expr.infix.rhs.infix.op.type == TokenType.Carrot);
 
     writeln("Parsed successfully!");
 }
@@ -267,8 +328,8 @@ unittest
     byte[] input = cast(byte[]) line;
     Lexer l = new Lexer(input);
     Parser p = new Parser(l.tokens);
-    displayParenRPN(p.ast);
-    assert(p.ast.infix.op.type is TokenType.Greater);
+    displayParenRPN((p.stmts[0].expr.expr));
+    assert(p.stmts[0].expr.expr.infix.op.type is TokenType.Greater);
     writeln();
     writeln("Parsed successfully!");
 }
@@ -279,8 +340,42 @@ unittest
     byte[] input = cast(byte[]) line;
     Lexer l = new Lexer(input);
     Parser p = new Parser(l.tokens);
-    displayParenRPN(p.ast);
-    assert(p.ast.infix.op.type is TokenType.BangEqual);
+    displayParenRPN(p.stmts[0].expr.expr);
+    assert(p.stmts[0].expr.expr.infix.op.type is TokenType.BangEqual);
     writeln();
     writeln("Parsed successfully!");
+}
+
+unittest
+{
+    string line = "12 + 3";
+    byte[] input = cast(byte[]) line;
+
+    Lexer l = new Lexer(input);
+    Parser p = new Parser(l.tokens);
+    assert(p.stmts[0].type is StatementType.Expression);
+
+}
+
+unittest
+{
+    string line = "var x = 12";
+    byte[] input = cast(byte[]) line;
+
+    Lexer l = new Lexer(input);
+    Parser p = new Parser(l.tokens);
+    assert(p.stmts[0].type is StatementType.Var);
+
+}
+
+unittest
+{
+    string line = "return 12 > 12";
+    byte[] input = cast(byte[]) line;
+
+    Lexer l = new Lexer(input);
+    Parser p = new Parser(l.tokens);
+    assert(p.stmts[0].type is StatementType.Return);
+    assert(p.stmts[0].expr.expr.infix.rhs.lit.num.type is TokenType.Int);
+
 }

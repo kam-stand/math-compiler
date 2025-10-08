@@ -7,6 +7,9 @@ enum TokenType
 
     // Base types
     Int,
+    Double,
+    Float,
+    String,
 
     LeftParen,
     RightParen,
@@ -25,10 +28,23 @@ enum TokenType
     EqualEqual,
     LessEqual,
     GreaterEqual,
-    // types
-    Question
 
+    // Delimitters
+    Semicolon,
+
+    // types
+    Question,
+    Identifier, // 'x'
+
+    // keywords
+    Var, // var x
+    Return, // return 12 + 2
 }
+
+TokenType[string] keyword = [
+    "var": TokenType.Var,
+    "return": TokenType.Return,
+];
 
 struct Token
 {
