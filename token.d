@@ -24,7 +24,9 @@ enum TokenType
     Equal,
     EqualEqual,
     LessEqual,
-    GreaterEqual
+    GreaterEqual,
+    // types
+    Question
 
 }
 

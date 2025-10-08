@@ -117,6 +117,11 @@ private:
                 advance();
                 break;
 
+            case '?':
+                tokens ~= new Token(TokenType.Question, input[index .. index + 1]);
+                advance();
+                break;
+
             case '!':
                 if (peekNext() == '=')
                 {
@@ -237,5 +242,18 @@ unittest
     assert(t.length == 4);
     assert(t[0].type == TokenType.Int);
     assert(t[1].type == TokenType.EqualEqual);
+
+}
+
+unittest
+{
+    byte[] input = ['1', '+', '3', '?'];
+
+    Lexer l = new Lexer(input);
+
+    auto t = l.tokens;
+    assert(t.length == 5);
+    assert(t[0].type == TokenType.Int);
+    assert(t[3].type == TokenType.Question);
 
 }
