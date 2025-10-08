@@ -75,7 +75,7 @@ private:
                 else
                 {
                     tokens ~= new Token(TokenType.Equal, input[index .. index + 1]);
-                    advance(); // consume '!'
+                    advance(); // consume '='
                 }
                 break;
 
