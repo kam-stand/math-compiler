@@ -7,7 +7,7 @@ import lexer;
 enum Precedence
 {
     Lowest = 0,
-    Comparison, // <  >
+    Comparison, // <  > >= <= != ==
     Additive, // + -
     Multiplicative, // * /
     Exponent, // ^
@@ -16,13 +16,22 @@ enum Precedence
 }
 
 immutable Precedence[TokenType] precedences = [
+    // additive
     TokenType.Plus: Precedence.Additive,
     TokenType.Minus: Precedence.Additive,
+    // multiplicative
     TokenType.Asterisk: Precedence.Multiplicative,
     TokenType.Slash: Precedence.Multiplicative,
+    // exponent
     TokenType.Carrot: Precedence.Exponent,
+    // comparison
     TokenType.Less: Precedence.Comparison,
     TokenType.Greater: Precedence.Comparison,
+    TokenType.LessEqual: Precedence.Comparison,
+    TokenType.GreaterEqual: Precedence.Comparison,
+    TokenType.BangEqual: Precedence.Comparison,
+    TokenType.EqualEqual: Precedence.Comparison,
+    // postfix
     TokenType.Bang: Precedence.Postfix,
 ];
 
@@ -133,6 +142,10 @@ private:
         case TokenType.Carrot:
         case TokenType.Less:
         case TokenType.Greater:
+        case TokenType.LessEqual:
+        case TokenType.GreaterEqual:
+        case TokenType.BangEqual:
+        case TokenType.EqualEqual:
             return parseInfix(lhs, op);
         default:
             writeln("Unexpected token in led: ", op.type);
@@ -255,6 +268,19 @@ unittest
     Lexer l = new Lexer(input);
     Parser p = new Parser(l.tokens);
     displayParenRPN(p.ast);
+    assert(p.ast.infix.op.type is TokenType.Greater);
+    writeln();
+    writeln("Parsed successfully!");
+}
+
+unittest
+{
+    string line = "6 != 7";
+    byte[] input = cast(byte[]) line;
+    Lexer l = new Lexer(input);
+    Parser p = new Parser(l.tokens);
+    displayParenRPN(p.ast);
+    assert(p.ast.infix.op.type is TokenType.BangEqual);
     writeln();
     writeln("Parsed successfully!");
 }
