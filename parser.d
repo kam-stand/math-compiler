@@ -7,7 +7,7 @@ import lexer;
 enum Precedence
 {
     Lowest = 0,
-    Comparison, // <  >
+    Comparison, // <  > >= <= != ==
     Additive, // + -
     Multiplicative, // * /
     Exponent, // ^
@@ -16,25 +16,40 @@ enum Precedence
 }
 
 immutable Precedence[TokenType] precedences = [
+    // additive
     TokenType.Plus: Precedence.Additive,
     TokenType.Minus: Precedence.Additive,
+    // multiplicative
     TokenType.Asterisk: Precedence.Multiplicative,
     TokenType.Slash: Precedence.Multiplicative,
+    // exponent
     TokenType.Carrot: Precedence.Exponent,
+    // comparison
     TokenType.Less: Precedence.Comparison,
     TokenType.Greater: Precedence.Comparison,
+    TokenType.LessEqual: Precedence.Comparison,
+    TokenType.GreaterEqual: Precedence.Comparison,
+    TokenType.BangEqual: Precedence.Comparison,
+    TokenType.EqualEqual: Precedence.Comparison,
+    // postfix
     TokenType.Bang: Precedence.Postfix,
 ];
 
 class Parser
 {
-    Token*[] tokens;
-    size_t pos = 0; // current position
 
+public:
+    Expression* ast;
     this(Token*[] tokens)
     {
         this.tokens = tokens;
+        this.ast = parse(Precedence.Lowest);
     }
+
+private:
+
+    Token*[] tokens; // tokens from lexer
+    size_t pos = 0; // current position
 
     Token* peek()
     {
@@ -127,6 +142,10 @@ class Parser
         case TokenType.Carrot:
         case TokenType.Less:
         case TokenType.Greater:
+        case TokenType.LessEqual:
+        case TokenType.GreaterEqual:
+        case TokenType.BangEqual:
+        case TokenType.EqualEqual:
             return parseInfix(lhs, op);
         default:
             writeln("Unexpected token in led: ", op.type);
@@ -203,8 +222,7 @@ unittest
     byte[] input = cast(byte[]) line;
     Lexer l = new Lexer(input);
     Parser p = new Parser(l.tokens);
-    auto expr = p.parse(0);
-    displayParenRPN(expr);
+    displayParenRPN(p.ast);
     writeln();
     writeln("Parsed successfully!");
 }
@@ -215,12 +233,11 @@ unittest
     byte[] input = cast(byte[]) line;
     Lexer l = new Lexer(input);
     Parser p = new Parser(l.tokens);
-    auto expr = p.parse(0);
-    displayParenRPN(expr);
+    displayParenRPN(p.ast);
     writeln();
-    assert(expr.type is ExpressionType.Prefix);
-    assert(expr.prefix.op.type is TokenType.Minus);
-    assert(expr.prefix.rhs.type is ExpressionType.Postfix);
+    assert(p.ast.type is ExpressionType.Prefix);
+    assert(p.ast.prefix.op.type is TokenType.Minus);
+    assert(p.ast.prefix.rhs.type is ExpressionType.Postfix);
     writeln("Parsed successfully!");
 }
 
@@ -230,18 +247,16 @@ unittest
     byte[] input = cast(byte[]) line;
     Lexer l = new Lexer(input);
     Parser p = new Parser(l.tokens);
-    auto expr = p.parse(0);
 
-    displayParenRPN(expr);
+    displayParenRPN(p.ast);
     writeln();
 
     // The root should be an infix '^'
-    assert(expr.type == ExpressionType.Infix);
-    assert(expr.infix.op.type == TokenType.Carrot);
-
+    assert(p.ast.type == ExpressionType.Infix);
+    assert(p.ast.infix.op.type == TokenType.Carrot);
     // Its right-hand side should also be another '^' infix
-    assert(expr.infix.rhs.type == ExpressionType.Infix);
-    assert(expr.infix.rhs.infix.op.type == TokenType.Carrot);
+    assert(p.ast.infix.rhs.type == ExpressionType.Infix);
+    assert(p.ast.infix.rhs.infix.op.type == TokenType.Carrot);
 
     writeln("Parsed successfully!");
 }
@@ -252,10 +267,20 @@ unittest
     byte[] input = cast(byte[]) line;
     Lexer l = new Lexer(input);
     Parser p = new Parser(l.tokens);
-    auto expr = p.parse(0);
-
-    displayParenRPN(expr);
+    displayParenRPN(p.ast);
+    assert(p.ast.infix.op.type is TokenType.Greater);
     writeln();
+    writeln("Parsed successfully!");
+}
 
+unittest
+{
+    string line = "6 != 7";
+    byte[] input = cast(byte[]) line;
+    Lexer l = new Lexer(input);
+    Parser p = new Parser(l.tokens);
+    displayParenRPN(p.ast);
+    assert(p.ast.infix.op.type is TokenType.BangEqual);
+    writeln();
     writeln("Parsed successfully!");
 }

@@ -19,7 +19,14 @@ enum TokenType
     Carrot,
     Less,
     Greater,
-    Bang
+    Bang,
+    BangEqual,
+    Equal,
+    EqualEqual,
+    LessEqual,
+    GreaterEqual,
+    // types
+    Question
 
 }
 

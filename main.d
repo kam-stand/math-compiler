@@ -15,11 +15,11 @@ int main(string[] args)
         string line = readln();
         if (line is null)
         {
-            break;
+            return 1;
         }
         if (line == "exit\n")
         {
-            break;
+            return 0;
         }
         if (line == "ast\n")
         {
@@ -30,9 +30,8 @@ int main(string[] args)
         byte[] input = cast(byte[]) line;
         Lexer l = new Lexer(input);
         Parser p = new Parser(l.tokens);
-        auto ast = p.parse(Precedence.Lowest);
         if (printAst)
-            displayParenRPN(ast);
+            displayParenRPN(p.ast);
         writeln();
 
     }
