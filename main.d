@@ -31,7 +31,7 @@ int main(string[] args)
         Lexer l = new Lexer(input);
         Parser p = new Parser(l.tokens);
         if (printAst)
-            displayParenRPN(p.ast);
+            displayParenRPN(p.stmts[0].expr.expr);
         writeln();
 
     }
